@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "248259965172",
+    "project_id": "cura-health-aabdb",
+    "storage_bucket": "cura-health-aabdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248259965172:android:6fd2197c4900dc06146ea1",
+        "android_client_info": {
+          "package_name": "com.example.cura_health"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwK-IRp7pDeG26ldvtOyY0ltcfInEUv-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

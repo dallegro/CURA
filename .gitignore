@@ -1,0 +1,76 @@
+# Visual Studio Code 설정 파일
+.vscode/
+
+# IntelliJ/Android Studio 설정 파일
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# 빌드된 파일
+build/
+dist/
+
+# macOS/OS X의 파일
+.DS_Store
+
+# 윈도우 시스템 파일
+Thumbs.db
+
+# Flutter와 관련된 빌드 아티팩트
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# 환경 변수나 민감한 정보를 저장하는 파일
+.env
+
+# 로그 파일
+*.log
+
+# 캐시 관련 폴더
+.dart_tool/
+.gradle/
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
