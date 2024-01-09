@@ -33,6 +33,28 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   List<Map<String, dynamic>> _hospitalList = []; // 병원 목록 데이터
   ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러
 
+  IconData getIconForCode(String code) {
+    if (hospitalInfoData != null &&
+        hospitalInfoData!['HospitalInfo'] != null &&
+        hospitalInfoData!['HospitalInfo'][code] != null) {
+      return IconData(hospitalInfoData!['HospitalInfo'][code]['icon'],
+          fontFamily: 'MaterialIcons');
+    } else {
+      return Icons.local_hospital;
+    }
+  }
+
+  Color getColorForCode(String code) {
+    if (hospitalInfoData != null &&
+        hospitalInfoData!['HospitalInfo'] != null &&
+        hospitalInfoData!['HospitalInfo'][code] != null) {
+      return Color(int.parse(hospitalInfoData!['HospitalInfo'][code]['color']
+          .replaceAll('#', '0xFF')));
+    } else {
+      return Colors.black;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -184,12 +206,68 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   Widget buildHospitalListTile(BuildContext context, int index) {
     if (index < _hospitalList.length) {
       var hospital = _hospitalList[index];
-      return ListTile(
-        title: Text(hospital['yadmNm']),
-        subtitle: Text(hospital['addr']),
+      var hospitalCode = hospital['code'] ?? ''; // 병원 코드
+
+      // 병원 코드에 해당하는 아이콘과 색상 가져오기
+      IconData hospitalIcon = getIconForCode(hospitalCode);
+      Color hospitalColor = getColorForCode(hospitalCode);
+
+      return GestureDetector(
         onTap: () {
           showHospitalDetail(hospital);
         },
+        child: Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          elevation: 4,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      hospitalIcon,
+                      color: hospitalColor,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Text(
+                      '${hospital['clCdNm'] ?? ''} / ${hospital['sidoCdNm'] ?? ''} / ${hospital['clCd'] ?? ''}',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.bold,
+                        color: hospitalColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  hospital['yadmNm'] ?? '', // 병원명
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  hospital['addr'] ?? '', // 주소
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     } else {
       return Center(

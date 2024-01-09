@@ -7,7 +7,9 @@ class DataFetchService {
   Future<Map<String, dynamic>?> fetchHospitalInfo() async {
     try {
       final hospitalInfoJson =
-          await rootBundle.loadString('assets/korean_hospital_Info.json');
+          await rootBundle.loadString('assets/korean_hospital_info.json');
+      print('병원 정보 가져오기 : ${jsonEncode(jsonDecode(hospitalInfoJson))}');
+
       return jsonDecode(hospitalInfoJson);
     } catch (error) {
       print('병원 정보 가져오기 에러: $error');
