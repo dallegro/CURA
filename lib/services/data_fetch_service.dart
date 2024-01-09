@@ -25,4 +25,15 @@ class DataFetchService {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> fetchHealthcareData() async {
+    try {
+      final healthcareDataJson =
+          await rootBundle.loadString('assets/healthcare_data_structure.json');
+      return jsonDecode(healthcareDataJson);
+    } catch (error) {
+      print('건강 관련 데이터 가져오기 에러: $error');
+      return null;
+    }
+  }
 }

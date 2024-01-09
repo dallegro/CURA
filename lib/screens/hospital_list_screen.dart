@@ -172,29 +172,6 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        value: selectedOptions.region,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedOptions.region = newValue ?? 'default';
-                            selectedOptions.district = '';
-                          });
-                        },
-                        items: (sidoData?['regions'] as List<dynamic>?)
-                                ?.map<DropdownMenuItem<String>>(
-                                  (region) => DropdownMenuItem<String>(
-                                    value: region['name'] as String,
-                                    child: Text(region['name'] as String),
-                                  ),
-                                )
-                                .toList() ??
-                            [
-                              DropdownMenuItem<String>(
-                                value: 'default',
-                                child: Text('Default'),
-                              ),
-                            ],
-                      )
                     ],
                   ),
                 ),
