@@ -1,49 +1,28 @@
+// data_fetch_service.dart
+
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:cura_health/models/hospital_model.dart'; // hospital_model.dart 파일을 import합니다.
 
 class DataFetchService {
-  static Future<Map<String, Map<String, String>>> fetchSidoData() async {
+  Future<Map<String, dynamic>?> fetchHospitalInfo() async {
     try {
-      final sidoString =
-          await rootBundle.loadString('assets/korean_regions.json');
-      final List<dynamic> regions = jsonDecode(sidoString)['regions'];
-
-      final Map<String, Map<String, String>> processedSidoData = {};
-
-      for (var region in regions) {
-        final Map<String, String> districtMap = {};
-        final districts = region['districts'];
-        districts.forEach((district) {
-          districtMap[district['name']] = district['code'].toString();
-        });
-        processedSidoData[region['name']] = districtMap;
-      }
-
-      return processedSidoData;
+      final hospitalInfoJson =
+          await rootBundle.loadString('assets/korean_hospital_Info.json');
+      return jsonDecode(hospitalInfoJson);
     } catch (error) {
-      print('에러: $error');
-      return {};
+      print('병원 정보 가져오기 에러: $error');
+      return null;
     }
   }
 
-  static Future<Map<String, HospitalInfo>> fetchHospitalInfo() async {
+  Future<Map<String, dynamic>?> fetchSidoData() async {
     try {
-      final hospitalInfo =
-          await rootBundle.loadString('assets/korean_hospital_info.json');
-      final Map<String, dynamic> hospitalInfoData = jsonDecode(hospitalInfo);
-      final Map<String, dynamic> hospitalInfoMap =
-          hospitalInfoData['HospitalInfo'];
-
-      return hospitalInfoMap.map((key, value) {
-        return MapEntry(
-          key,
-          HospitalInfo.fromJson(value),
-        );
-      });
+      final sidoString =
+          await rootBundle.loadString('assets/korean_regions.json');
+      return jsonDecode(sidoString);
     } catch (error) {
-      print('에러: $error');
-      return {};
+      print('지역 정보 가져오기 에러: $error');
+      return null;
     }
   }
 }
