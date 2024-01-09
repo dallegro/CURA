@@ -66,15 +66,15 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     _scrollController.addListener(_onScroll);
   }
 
-  Future<void> _initializeData() async {
-    await _fetchJsonData();
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
     _isLoading = false;
     super.dispose();
+  }
+
+  Future<void> _initializeData() async {
+    await _fetchJsonData();
   }
 
   @override
@@ -223,23 +223,6 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     );
   }
 
-  Widget buildFilterSection(String title, Widget content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 8),
-        content,
-      ],
-    );
-  }
-
   Widget buildMedicalFacilityDropdown() {
     return DropdownButton<String>(
       value: selectedOptions.selectedClCd ?? '',
@@ -267,6 +250,23 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
               );
             })?.toList() ??
             [],
+      ],
+    );
+  }
+
+  Widget buildFilterSection(String title, Widget content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        content,
       ],
     );
   }
