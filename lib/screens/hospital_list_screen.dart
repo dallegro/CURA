@@ -31,8 +31,8 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   final ApiService _apiService = ApiService(); // API 서비스 인스턴스
   final DataFetchService _dataFetchService = DataFetchService();
 
-  List<Map<String, dynamic>> _hospitalList = []; // 병원 목록 데이터
-  ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러
+  final List<Map<String, dynamic>> _hospitalList = []; // 병원 목록 데이터
+  final ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러
 
   IconData getIconForCode(String code) {
     if (hospitalInfoData != null &&
@@ -77,23 +77,37 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     await _fetchJsonData();
   }
 
+  // 병원 목록 화면을 새로고침하는 함수
+  Future<void> _refresh() async {
+    setState(() {
+      _hospitalList.clear();
+      _currentPage = 1;
+    });
+
+    await _fetchHospitalList(options: currentOptions); // 데이터 새로고침
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('병원 목록'),
+        title: GestureDetector(
+          onTap: _refresh, // 헤더 클릭 시 새로고침
+          child: const Text('병원 목록'),
+        ),
         actions: [
           IconButton(
             onPressed: toggleFilterVisibility,
-            icon: Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list),
           ),
           IconButton(
             onPressed: _showHospitalSearch,
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
           ),
           IconButton(
             onPressed: _navigateToProfileOrLogin,
-            icon: Icon(Icons.person),
+            icon: const Icon(Icons.person),
           ),
         ],
       ),
@@ -111,15 +125,15 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                   )
                 : Center(
                     child: _isLoading
-                        ? CircularProgressIndicator()
-                        : Text('검색결과가 없습니다.'),
+                        ? const CircularProgressIndicator()
+                        : const Text('검색결과가 없습니다.'),
                   ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _scrollToTop,
-        child: Icon(Icons.arrow_upward),
+        child: const Icon(Icons.arrow_upward),
       ),
     );
   }
@@ -130,13 +144,22 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
       opacity: isFilterVisible ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 200),
       child: isFilterVisible
-          ? Padding(
+          ? Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: SingleChildScrollView(
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey[300]!,
+                        spreadRadius: 1,
+                        blurRadius: 4,
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -147,14 +170,14 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                       const SizedBox(height: 16),
                       buildFilterSection('시/도', buildSidoDropdown()),
                       const SizedBox(height: 16),
-                      buildFilterSection('군구', buildDistrictDropdown()),
+                      buildFilterSection('군/구', buildDistrictDropdown()),
                       const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
             )
-          : SizedBox.shrink(),
+          : const SizedBox.shrink(),
     );
   }
 
@@ -169,7 +192,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
         applyFilters(selectedOptions);
       },
       items: [
-        DropdownMenuItem<String>(
+        const DropdownMenuItem<String>(
           value: '',
           child: Text(allOption),
         ),
@@ -209,7 +232,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
         applyFilters(selectedOptions);
       },
       items: [
-        DropdownMenuItem<String>(
+        const DropdownMenuItem<String>(
           value: '',
           child: Text(allOption),
         ),
@@ -233,7 +256,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
         applyFilters(selectedOptions);
       },
       items: [
-        DropdownMenuItem<String>(
+        const DropdownMenuItem<String>(
           value: '',
           child: Text(allOption),
         ),
@@ -260,7 +283,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -286,12 +309,14 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
           showHospitalDetail(hospital);
         },
         child: Card(
+          // color: Colors.white, // 이 부분을 추가하거나 변경해주세요.
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Color.fromARGB(255, 253, 253, 253)!,
+          elevation: 4,
           margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
-          elevation: 4,
-          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -301,7 +326,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                   children: [
                     Icon(
                       hospitalIcon,
-                      color: hospitalColor,
+                      color: getColorForCode(hospital['clCd']),
                     ),
                     const SizedBox(
                       width: 8,
@@ -311,7 +336,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                       style: TextStyle(
                         fontSize: 12.0,
                         fontWeight: FontWeight.bold,
-                        color: hospitalColor,
+                        color: getColorForCode(hospital['clCd']),
                       ),
                     ),
                   ],
@@ -319,7 +344,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                 const SizedBox(height: 8.0),
                 Text(
                   hospital['yadmNm'] ?? '', // 병원명
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -328,7 +353,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                 const SizedBox(height: 4.0),
                 Text(
                   hospital['addr'] ?? '', // 주소
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14.0,
                     color: Colors.black,
                   ),
@@ -340,7 +365,9 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
       );
     } else {
       return Center(
-        child: _isLoading ? CircularProgressIndicator() : Text('검색결과가 없습니다.'),
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : const Text('검색결과가 없습니다.'),
       );
     }
   }
@@ -445,6 +472,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   // JSON 데이터 가져오는 함수
   Future<void> _fetchJsonData() async {
     hospitalInfoData = await _dataFetchService.fetchHospitalInfo();
+    // print(hospitalInfoData);
     sidoData = await _dataFetchService.fetchRegionsData();
     setState(() {}); // 필요한 경우 상태 갱신
   }
@@ -461,7 +489,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   void _scrollToTop() {
     _scrollController.animateTo(
       0.0,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
   }

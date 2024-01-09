@@ -26,15 +26,33 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '플러터 데모',
+      title: 'CURA',
       theme: ThemeData(
         fontFamily: 'NotoSans',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(fontSize: 14.0, color: Colors.black87),
+          titleLarge: TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(),
+        ),
+        appBarTheme: const AppBarTheme(
+            // backgroundColor: Color(0xFF00FFA4),
+            ),
+        scaffoldBackgroundColor: Colors.white,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
-      home: LoginScreen(),
+      home: const LoginScreen(),
       routes: {
-        '/login': (context) => LoginScreen(),
+        '/login': (context) => const LoginScreen(),
         '/hospital_list': (context) => HospitalListScreen(),
         '/register': (context) => const RegisterScreen(),
         '/profile': (context) => ProfileScreen(),

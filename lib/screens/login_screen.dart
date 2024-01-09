@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('인증 화면'), // 화면 제목
+        title: Text('CURA'), // 화면 제목
       ),
       body: Center(
         child: Padding(
@@ -102,12 +102,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () => login(context),
                 child: Text('로그인'),
               ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/register');
                 },
                 child: Text('회원가입'), // 회원가입 버튼
               ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () => enterAsGuest(context),
                 child: Text('게스트로 시작하기'), // 게스트로 시작하기 버튼
