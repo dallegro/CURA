@@ -8,7 +8,7 @@ class DataFetchService {
     try {
       final hospitalInfoJson =
           await rootBundle.loadString('assets/korean_hospital_info.json');
-      print('병원 정보 가져오기 : ${jsonEncode(jsonDecode(hospitalInfoJson))}');
+      // print('병원 정보 가져오기 : ${jsonEncode(jsonDecode(hospitalInfoJson))}');
 
       return jsonDecode(hospitalInfoJson);
     } catch (error) {
@@ -17,7 +17,7 @@ class DataFetchService {
     }
   }
 
-  Future<Map<String, dynamic>?> fetchSidoData() async {
+  Future<Map<String, dynamic>?> fetchRegionsData() async {
     try {
       final sidoString =
           await rootBundle.loadString('assets/korean_regions.json');

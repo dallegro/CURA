@@ -2,14 +2,14 @@
 
 // 필요한 패키지 및 모듈 import
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-
 import 'package:cura_health/services/data_fetch_service.dart';
 import 'package:cura_health/services/api_service.dart';
 import 'package:cura_health/screens/hospital_detail_screen.dart';
 import 'package:cura_health/models/hospital_search_delegate.dart'; // Import 추가
+
+// 상수 정의
+const String allOption = '전체';
 
 // 병원 목록 화면 StatefulWidget 클래스
 class HospitalListScreen extends StatefulWidget {
@@ -23,6 +23,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   bool isFilterVisible = false; // 필터 UI 표시 여부
   int _currentPage = 1; // 페이지 번호를 저장하는 변수
   FilterOptions selectedOptions = FilterOptions(); // 선택된 필터 옵션을 관리하는 객체
+  FilterOptions currentOptions = FilterOptions(); // currentOptions 추가
 
   Map<String, dynamic>? hospitalInfoData;
   Map<String, dynamic>? sidoData;
@@ -51,7 +52,8 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
       return Color(int.parse(hospitalInfoData!['HospitalInfo'][code]['color']
           .replaceAll('#', '0xFF')));
     } else {
-      return Colors.black;
+      // 병원 코드에 매칭되는 정보가 없는 경우 기본 색상 반환
+      return Colors.black; // 여기에 기본 색상 지정 가능
     }
   }
 
@@ -59,8 +61,13 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   void initState() {
     super.initState();
     _initializeData();
-    _fetchHospitalList();
+    currentOptions = getCurrentFilterOptions(); // 현재 필터 옵션 초기화
+    _fetchHospitalList(options: currentOptions);
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _initializeData() async {
+    await _fetchJsonData();
   }
 
   @override
@@ -70,7 +77,6 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     super.dispose();
   }
 
-  // 화면 빌드 함수
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,14 +92,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
             icon: Icon(Icons.search),
           ),
           IconButton(
-            onPressed: () {
-              User? currentUser = FirebaseAuth.instance.currentUser;
-              if (currentUser != null) {
-                Navigator.pushNamed(context, '/profile');
-              } else {
-                Navigator.pushNamed(context, '/login');
-              }
-            },
+            onPressed: _navigateToProfileOrLogin,
             icon: Icon(Icons.person),
           ),
         ],
@@ -119,19 +118,13 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _scrollController.animateTo(
-            0.0,
-            duration: Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        },
+        onPressed: _scrollToTop,
         child: Icon(Icons.arrow_upward),
       ),
     );
   }
 
-// 필터 UI 위젯
+  // 필터 UI 위젯
   Widget buildFilterOptions() {
     return AnimatedOpacity(
       opacity: isFilterVisible ? 1.0 : 0.0,
@@ -149,51 +142,13 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        '의료 시설 분류',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        value: selectedOptions.medicalFacilityCode ?? '전체',
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedOptions.medicalFacilityCode = newValue!;
-                          });
-                        },
-                        items: [
-                          const DropdownMenuItem<String>(
-                            value: '전체',
-                            child: Text('전체'),
-                          ),
-                          ...(hospitalInfoData?['HospitalInfo']
-                                      as Map<String, dynamic>?)
-                                  ?.entries
-                                  .map<DropdownMenuItem<String>>(
-                                      (MapEntry<String, dynamic> entry) {
-                                final String code = entry.key;
-                                final Map<String, dynamic> info =
-                                    entry.value as Map<String, dynamic>;
-                                return DropdownMenuItem<String>(
-                                  value: code,
-                                  child: Text(info['name'] as String),
-                                );
-                              })?.toList() ??
-                              [],
-                        ],
-                      ),
+                      buildFilterSection(
+                          '의료 시설 분류', buildMedicalFacilityDropdown()),
                       const SizedBox(height: 16),
-                      const Text(
-                        '지역 옵션',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      buildFilterSection('시/도', buildSidoDropdown()),
+                      const SizedBox(height: 16),
+                      buildFilterSection('군구', buildDistrictDropdown()),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -203,6 +158,120 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     );
   }
 
+  Widget buildSidoDropdown() {
+    return DropdownButton<String>(
+      value: selectedOptions.selectedSidoCode ?? '',
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedOptions.selectedSidoCode = newValue!;
+          selectedOptions.selectedSgguCode = ''; // 변경 시 군구 초기화
+        });
+        applyFilters(selectedOptions);
+      },
+      items: [
+        DropdownMenuItem<String>(
+          value: '',
+          child: Text(allOption),
+        ),
+        if (sidoData != null)
+          for (var sido in sidoData!['regions'] as List<dynamic>)
+            DropdownMenuItem<String>(
+              value: sido['code'].toString(),
+              child: Text(sido['name'] as String),
+            ),
+      ],
+    );
+  }
+
+  Widget buildDistrictDropdown() {
+    final selectedSido = selectedOptions.selectedSidoCode;
+    List<Map<String, dynamic>>? districts = [];
+
+    if (sidoData != null) {
+      final selectedSidoData = (sidoData!['regions'] as List<dynamic>)
+          .firstWhere((region) => region['code'] == selectedSido,
+              orElse: () => null);
+
+      if (selectedSidoData != null) {
+        final dynamic districtsData = selectedSidoData['districts'];
+        if (districtsData is List) {
+          districts = List<Map<String, dynamic>>.from(districtsData);
+        }
+      }
+    }
+
+    return DropdownButton<String>(
+      value: selectedOptions.selectedSgguCode ?? '',
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedOptions.selectedSgguCode = newValue!;
+        });
+        applyFilters(selectedOptions);
+      },
+      items: [
+        DropdownMenuItem<String>(
+          value: '',
+          child: Text(allOption),
+        ),
+        if (districts != null)
+          for (var district in districts!)
+            DropdownMenuItem<String>(
+              value: district['code'].toString(),
+              child: Text(district['name'] as String),
+            ),
+      ],
+    );
+  }
+
+  Widget buildFilterSection(String title, Widget content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        content,
+      ],
+    );
+  }
+
+  Widget buildMedicalFacilityDropdown() {
+    return DropdownButton<String>(
+      value: selectedOptions.selectedClCd ?? '',
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedOptions.selectedClCd = newValue!;
+        });
+        applyFilters(selectedOptions);
+      },
+      items: [
+        DropdownMenuItem<String>(
+          value: '',
+          child: Text(allOption),
+        ),
+        ...(hospitalInfoData?['HospitalInfo'] as Map<String, dynamic>?)
+                ?.entries
+                .map<DropdownMenuItem<String>>(
+                    (MapEntry<String, dynamic> entry) {
+              final String code = entry.key;
+              final Map<String, dynamic> info =
+                  entry.value as Map<String, dynamic>;
+              return DropdownMenuItem<String>(
+                value: code,
+                child: Text(info['name'] as String),
+              );
+            })?.toList() ??
+            [],
+      ],
+    );
+  }
+
+  // 병원 목록 타일 위젯 구현
   Widget buildHospitalListTile(BuildContext context, int index) {
     if (index < _hospitalList.length) {
       var hospital = _hospitalList[index];
@@ -276,13 +345,35 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     }
   }
 
+  // 필터 옵션 반환 로직
+  FilterOptions getCurrentFilterOptions() {
+    return FilterOptions(
+      searchKeyword: selectedOptions.searchKeyword,
+      selectedClCd: selectedOptions.selectedClCd,
+      selectedSidoCode: selectedOptions.selectedSidoCode,
+      selectedSgguCode: selectedOptions.selectedSgguCode,
+    );
+  }
+
   // 스크롤 이벤트 처리 함수
   void _onScroll() {
     if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent &&
         !_isLoading) {
-      _fetchHospitalList();
+      // 현재 필터 옵션을 가져와서 전달
+      final currentOptions = getCurrentFilterOptions();
+      _fetchHospitalList(options: currentOptions);
     }
+  }
+
+  // 검색 어 변경 시 처리 함수
+  void _onSearchChanged(String query) {
+    final newOptions = FilterOptions(
+        selectedClCd: '',
+        selectedSidoCode: '',
+        selectedSgguCode: '',
+        searchKeyword: query);
+    _fetchHospitalList(options: newOptions);
   }
 
   // 병원 검색 화면 표시 함수
@@ -293,22 +384,11 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     );
   }
 
-  // 검색어 변경 시 처리 함수
-  void _onSearchChanged(String query) {
-    _fetchHospitalList(searchKeyword: query);
-  }
-
   // 필터 UI 표시/숨김 토글 함수
   void toggleFilterVisibility() {
     setState(() {
       isFilterVisible = !isFilterVisible;
     });
-  }
-
-  // 필터 적용 함수
-  void _applyFilters(FilterOptions selectedOptions) {
-    String filterKeyword = selectedOptions.filterKeyword;
-    _fetchHospitalList(searchKeyword: filterKeyword);
   }
 
   // 병원 세부 정보 표시 함수
@@ -321,21 +401,33 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     );
   }
 
-  void _initializeData() async {
-    await _fetchJsonData();
+  // 필터 적용 메서드
+  void applyFilters(FilterOptions options) {
+    setState(() {
+      // _isLoading = true;
+      _hospitalList.clear();
+      _currentPage = 1;
+    });
+
+    _fetchHospitalList(options: options);
   }
 
   // 병원 목록 가져오는 함수
-  Future<void> _fetchHospitalList({String searchKeyword = ''}) async {
+  Future<void> _fetchHospitalList({required FilterOptions options}) async {
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
       });
+
       try {
         var hospitals = await _apiService.fetchHospitalList(
-          yadmNm: searchKeyword,
+          yadmNm: options.searchKeyword,
           page: _currentPage,
+          clCd: options.selectedClCd,
+          sidoCd: options.selectedSidoCode,
+          sgguCd: options.selectedSgguCode,
         );
+
         setState(() {
           _hospitalList.addAll(hospitals);
           _isLoading = false;
@@ -346,48 +438,59 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
           _isLoading = false;
         });
         print('병원 목록 가져오기 오류: $e');
-        // 에러 발생 시 더 자세한 에러 메시지를 사용자에게 표시할 수 있도록 수정
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('에러 발생'),
-            content: Text('병원 목록을 가져오는 중 오류가 발생했습니다: $e'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text('확인'),
-              ),
-            ],
-          ),
-        );
       }
     }
   }
 
+  // JSON 데이터 가져오는 함수
   Future<void> _fetchJsonData() async {
     hospitalInfoData = await _dataFetchService.fetchHospitalInfo();
-    sidoData = await _dataFetchService.fetchSidoData();
+    sidoData = await _dataFetchService.fetchRegionsData();
     setState(() {}); // 필요한 경우 상태 갱신
+  }
+
+  void _navigateToProfileOrLogin() {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      Navigator.pushNamed(context, '/profile');
+    } else {
+      Navigator.pushNamed(context, '/login');
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
   }
 }
 
 class FilterOptions {
-  String medicalFacilityCode = '전체'; // 선택된 의료 시설 분류 코드
-  String region = ''; // 선택된 지역 (시/도)
-  String district = ''; // 선택된 지역 (구/군)
+  String searchKeyword = ''; // 병원명 검색 키워드
+  String selectedClCd = ''; // 선택된 의료 시설 분류 코드
+  String selectedSidoCode = ''; // 선택된 시/도 코드
+  String selectedSgguCode = ''; // 선택된 구/군 코드
 
+  FilterOptions({
+    this.searchKeyword = '',
+    this.selectedClCd = '',
+    this.selectedSidoCode = '',
+    this.selectedSgguCode = '',
+  });
+
+  // 필터 키워드를 반환하는 함수
   String get filterKeyword {
     String keyword = '';
-    if (medicalFacilityCode.isNotEmpty) {
-      keyword += medicalFacilityCode;
+    if (selectedClCd.isNotEmpty) {
+      keyword += selectedClCd;
     }
-    if (region.isNotEmpty) {
-      keyword += region;
+    if (selectedSidoCode.isNotEmpty) {
+      keyword += selectedSidoCode;
     }
-    if (district.isNotEmpty) {
-      keyword += district;
+    if (selectedSgguCode.isNotEmpty) {
+      keyword += selectedSgguCode;
     }
     return keyword;
   }

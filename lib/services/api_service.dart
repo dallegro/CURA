@@ -7,10 +7,12 @@ import 'package:dio/dio.dart';
 // ApiService 클래스 정의
 class ApiService {
   Future<List<Map<String, dynamic>>> fetchHospitalList({
-    String sidoCd = '',
-    String yadmNm = '',
-    int itemsPerPage = 20,
     int page = 1,
+    int itemsPerPage = 20,
+    String clCd = '',
+    String yadmNm = '',
+    String sidoCd = '',
+    String sgguCd = '',
   }) async {
     const String baseUrl =
         'https://apis.data.go.kr/B551182/hospInfoServicev2/getHospBasisList';
@@ -24,12 +26,13 @@ class ApiService {
       'ServiceKey': serviceKey,
       'numOfRows': '$itemsPerPage',
       'pageNo': '$page',
+      'clCd': clCd,
       'sidoCd': sidoCd,
+      'sgguCd': sgguCd,
       'yadmNm': yadmNm,
     };
 
-    var uri = Uri.parse(baseUrl);
-    uri = uri.replace(queryParameters: queryParams);
+    final Uri uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
     print('병원 API URL : $uri');
 
     try {

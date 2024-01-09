@@ -35,12 +35,10 @@ class HospitalSearchDelegate extends SearchDelegate<void> {
     );
   }
 
-  // 검색 결과 표시
   @override
   Widget buildResults(BuildContext context) {
-    // 검색어가 비어있으면 안내 메시지 표시
     if (query.isEmpty) {
-      return const Center(
+      return Center(
         child: Text('검색어를 입력하세요.'),
       );
     }
@@ -48,23 +46,19 @@ class HospitalSearchDelegate extends SearchDelegate<void> {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _apiService.fetchHospitalList(yadmNm: query),
       builder: (context, snapshot) {
-        // 데이터 로딩 중인 경우 로딩 표시
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError) {
-          // 에러 발생 시 에러 메시지 표시
           return Center(
             child: Text('에러: ${snapshot.error}'),
           );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          // 검색 결과 없을 경우 안내 메시지 표시
-          return const Center(
+          return Center(
             child: Text('검색 결과 없음.'),
           );
         } else {
-          // 검색 결과가 있는 경우 리스트로 표시
           List<Map<String, dynamic>> searchResults = snapshot.data!;
           return ListView.builder(
             itemCount: searchResults.length,
@@ -85,7 +79,6 @@ class HospitalSearchDelegate extends SearchDelegate<void> {
     );
   }
 
-  // 검색어 제안 목록 표시
   @override
   Widget buildSuggestions(BuildContext context) {
     final suggestionList = hospitalList.where((hospital) =>
