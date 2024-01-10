@@ -1,41 +1,9 @@
-# Visual Studio Code 설정 파일
-.vscode/
-
-# IntelliJ/Android Studio 설정 파일
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# 빌드된 파일
-build/
-dist/
-
-# macOS/OS X의 파일
-.DS_Store
-
-# 윈도우 시스템 파일
-Thumbs.db
-
-# Flutter와 관련된 빌드 아티팩트
-.flutter-plugins
-.flutter-plugins-dependencies
-
-# 환경 변수나 민감한 정보를 저장하는 파일
-.env
-
-# 로그 파일
-*.log
-
-# 캐시 관련 폴더
-.dart_tool/
-.gradle/
-
-# Miscellaneous
+# 잡다한 파일
 *.class
 *.log
 *.pyc
 *.swp
+*.txt
 .DS_Store
 .atom/
 .buildlog/
@@ -43,18 +11,35 @@ Thumbs.db
 .svn/
 migrate_working_dir/
 
-# IntelliJ related
+# IntelliJ 관련
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
+# IntelliJ/Android Studio 프로젝트 파일
+.idea/
+
+# Flutter 플랫폼 폴더
+android/
+ios/
+
+# 디버그 모드에서 생성되는 파일
+*.iml
+*.lock
+*.log
+*.ids
+*.metadata
+*.flutter-plugins
+*.flutter-plugins-dependencies
+*.dart_tools/
+*.flutter-plugins-dependencies/
+
+# .vscode 폴더에는 VS Code에서 구성한 런치 설정 및 태스크가 포함되어 있습니다.
+# 이 줄은 기본적으로 주석 처리되어 있습니다.
 #.vscode/
 
-# Flutter/Dart/Pub related
+# Flutter/Dart/Pub 관련
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -64,13 +49,16 @@ migrate_working_dir/
 .pub/
 /build/
 
-# Symbolication related
+# Symbolication 관련
 app.*.symbols
 
-# Obfuscation related
+# 난독화 관련
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio가 빌드 아티팩트를 여기에 배치합니다.
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Node.js에서 사용되는 node_modules 폴더
+node_modules/

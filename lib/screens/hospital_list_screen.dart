@@ -38,12 +38,22 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
     if (hospitalInfoData != null &&
         hospitalInfoData!['HospitalInfo'] != null &&
         hospitalInfoData!['HospitalInfo'][code] != null) {
-      return IconData(hospitalInfoData!['HospitalInfo'][code]['icon'],
-          fontFamily: 'MaterialIcons');
+      // IconData를 상수 값으로 변경
+      return Icons.local_hospital; // 예를 들어, 기본 값으로 변경
     } else {
       return Icons.local_hospital;
     }
   }
+  // IconData getIconForCode(String code) {
+  //   if (hospitalInfoData != null &&
+  //       hospitalInfoData!['HospitalInfo'] != null &&
+  //       hospitalInfoData!['HospitalInfo'][code] != null) {
+  //     return IconData(hospitalInfoData!['HospitalInfo'][code]['icon'],
+  //         fontFamily: 'MaterialIcons');
+  //   } else {
+  //     return Icons.local_hospital;
+  //   }
+  // }
 
   Color getColorForCode(String code) {
     if (hospitalInfoData != null &&
