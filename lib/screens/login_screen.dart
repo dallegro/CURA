@@ -18,11 +18,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true; // 비밀번호 가리기 여부
 
   // 로그인 처리
-  Future<void> login(BuildContext context) async {
+  Future<void> signInWithEmailAndPassword(BuildContext context) async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
     try {
-      final userCredential = await _authService.login(email, password);
+      final userCredential =
+          await _authService.signInWithEmailAndPassword(email, password);
 
       if (userCredential != null) {
         SnackbarHelper.showSuccess(context, '로그인 성공');
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 게스트로 로그인 처리
 
-  Future<void> enterAsGuest(BuildContext context) async {
+  Future<void> signInAnonymously(BuildContext context) async {
     try {
       UserCredential? userCredential =
           await FirebaseAuth.instance?.signInAnonymously();
@@ -73,46 +74,44 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextField(
+              TextFormField(
                 controller: emailController,
-                decoration: InputDecoration(
-                  labelText: '이메일', // 이메일 입력란
-                ),
+                decoration: const InputDecoration(labelText: '이메일'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '이메일을 입력하세요.';
+                  }
+                  return null;
+                },
               ),
-              SizedBox(height: 20),
-              TextField(
+              const SizedBox(height: 20),
+              TextFormField(
                 controller: passwordController,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  labelText: '비밀번호', // 비밀번호 입력란
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
-                ),
+                obscureText: true,
+                decoration: const InputDecoration(labelText: '비밀번호'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '비밀번호를 입력하세요.';
+                  }
+                  return null;
+                },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => login(context),
-                child: Text('로그인'),
+                onPressed: () => signInWithEmailAndPassword(context),
+                child: const Text('이메일/비밀번호로 로그인'),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/register');
                 },
-                child: Text('회원가입'), // 회원가입 버튼
+                child: const Text('회원가입'), // 회원가입 버튼
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () => enterAsGuest(context),
-                child: Text('게스트로 시작하기'), // 게스트로 시작하기 버튼
+                onPressed: () => signInAnonymously(context),
+                child: const Text('게스트로 시작하기'), // 게스트로 시작하기 버튼
               ),
             ],
           ),

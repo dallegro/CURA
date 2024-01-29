@@ -29,6 +29,7 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
   Map<String, dynamic>? sidoData;
 
   final ApiService _apiService = ApiService(); // API 서비스 인스턴스
+  final DrugInfo _drugInfo = DrugInfo(); // API 서비스 인스턴스
   final DataFetchService _dataFetchService = DataFetchService();
 
   final List<Map<String, dynamic>> _hospitalList = []; // 병원 목록 데이터
@@ -44,16 +45,6 @@ class _HospitalListScreenState extends State<HospitalListScreen> {
       return Icons.local_hospital;
     }
   }
-  // IconData getIconForCode(String code) {
-  //   if (hospitalInfoData != null &&
-  //       hospitalInfoData!['HospitalInfo'] != null &&
-  //       hospitalInfoData!['HospitalInfo'][code] != null) {
-  //     return IconData(hospitalInfoData!['HospitalInfo'][code]['icon'],
-  //         fontFamily: 'MaterialIcons');
-  //   } else {
-  //     return Icons.local_hospital;
-  //   }
-  // }
 
   Color getColorForCode(String code) {
     if (hospitalInfoData != null &&

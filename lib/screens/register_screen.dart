@@ -1,8 +1,10 @@
 //register_screen.dart
 
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:cura_health/services/auth_service.dart';
 import 'package:cura_health/utils/snackbar_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,14 +31,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _selectProfileImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        imageFile = File(pickedFile.path);
-      });
+    if (kIsWeb || Platform.isWindows) {
+      try {
+        final pickedFile = await ImagePickerWeb.getImageAsFile();
+        if (pickedFile != null) {
+          final fileName = pickedFile.name ?? 'image.jpg';
+          setState(() {
+            imageFile = File(fileName);
+          });
+        } else {
+          SnackbarHelper.showError(context, '이미지를 선택하지 않았습니다.');
+        }
+      } catch (e) {
+        print('이미지 로드 중 오류: $e');
+      }
     } else {
-      // 이미지를 선택하지 않은 경우 처리
-      SnackbarHelper.showError(context, '이미지를 선택하지 않았습니다.');
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          imageFile = File(pickedFile.path);
+        });
+      } else {
+        SnackbarHelper.showError(context, '이미지를 선택하지 않았습니다.');
+      }
     }
   }
 
@@ -64,13 +81,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
-      User? registerSuccess = await AuthService().signup(
+      User? registerSuccess = await AuthService().signUpWithEmailAndPassword(
         name: name,
         email: email,
         password: password,
         photo: imageFile!,
       );
-      if (registerSuccess == null) {
+      if (registerSuccess != null) {
         SnackbarHelper.showSuccess(context, '회원가입이 성공적으로 완료되었습니다.');
         Navigator.pushReplacementNamed(context, '/login');
       } else {

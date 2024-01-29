@@ -2,6 +2,9 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+    
+    // Add the dependency for the Google services Gradle plugin
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -45,6 +48,7 @@ android {
         applicationId "com.example.cura_health"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        multiDexEnabled true
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -64,4 +68,22 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    // ...
+
+    // Import the Firebase BoM
+    implementation 'com.google.firebase:firebase-bom:32.7.0'
+    // implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+
+    // BoM을 사용하기 때문에 Firebase 들의 version을 명시할 필요가 없다.
+
+    // Add the dependency for the Firebase SDK for Google Analytics
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // TODO: Add the dependencies for any other Firebase products you want to use
+    // See https://firebase.google.com/docs/android/setup#available-libraries
+    // For example, add the dependencies for Firebase Authentication and Cloud Firestore
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-appcheck'
+}

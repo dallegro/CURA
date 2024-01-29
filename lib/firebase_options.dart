@@ -49,6 +49,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '248259965172',
     projectId: 'cura-health-aabdb',
     authDomain: 'cura-health-aabdb.firebaseapp.com',
+    databaseURL: 'https://cura-health-aabdb-default-rtdb.firebaseio.com',
     storageBucket: 'cura-health-aabdb.appspot.com',
     measurementId: 'G-2DXNTYEZ7F',
   );
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     appId: '1:248259965172:android:6fd2197c4900dc06146ea1',
     messagingSenderId: '248259965172',
     projectId: 'cura-health-aabdb',
+    databaseURL: 'https://cura-health-aabdb-default-rtdb.firebaseio.com',
     storageBucket: 'cura-health-aabdb.appspot.com',
   );
 
@@ -66,6 +68,7 @@ class DefaultFirebaseOptions {
     appId: '1:248259965172:ios:219f50f58800e965146ea1',
     messagingSenderId: '248259965172',
     projectId: 'cura-health-aabdb',
+    databaseURL: 'https://cura-health-aabdb-default-rtdb.firebaseio.com',
     storageBucket: 'cura-health-aabdb.appspot.com',
     iosBundleId: 'com.example.curaHealth',
   );
@@ -75,6 +78,7 @@ class DefaultFirebaseOptions {
     appId: '1:248259965172:ios:223c308152844a12146ea1',
     messagingSenderId: '248259965172',
     projectId: 'cura-health-aabdb',
+    databaseURL: 'https://cura-health-aabdb-default-rtdb.firebaseio.com',
     storageBucket: 'cura-health-aabdb.appspot.com',
     iosBundleId: 'com.example.curaHealth.RunnerTests',
   );

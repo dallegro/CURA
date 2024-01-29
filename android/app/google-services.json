@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "248259965172",
+    "firebase_url": "https://cura-health-aabdb-default-rtdb.firebaseio.com",
     "project_id": "cura-health-aabdb",
     "storage_bucket": "cura-health-aabdb.appspot.com"
   },

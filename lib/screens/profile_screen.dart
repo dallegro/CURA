@@ -5,15 +5,30 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cura_health/services/auth_service.dart';
 import 'package:cura_health/utils/snackbar_helper.dart';
+import 'package:cura_health/services/favorite_service.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   ProfileScreen({Key? key}) : super(key: key);
 
-  final AuthService _auth = AuthService();
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService _authenticationService = AuthService();
+  final FavoriteService _favoriteService = FavoriteService();
+  late User? currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    // initState에서 사용자 정보를 가져옵니다.
+    currentUser = _authenticationService.getCurrentUser();
+  }
 
   void navigateToProfileManagement(BuildContext context) {
     // 개인정보 관리 페이지로 이동
-    // Navigator.pushNamed(context, '/profile_management');
+    Navigator.pushNamed(context, '/profile_management');
   }
 
   void navigateToAccountSettings(BuildContext context) {
@@ -21,18 +36,16 @@ class ProfileScreen extends StatelessWidget {
     // Navigator.pushNamed(context, '/account_settings');
   }
 
-// 고객 지원 버튼을 눌렀을 때 실행되는 함수
   void navigateToCustomerSupport(BuildContext context) {
     sendEmail(context);
   }
 
   void _logout(BuildContext context) async {
     try {
-      await _auth.logout();
+      await _authenticationService.logout();
       Navigator.pushReplacementNamed(context, '/login');
       SnackbarHelper.showSuccess(context, '계정이 성공적으로 로그아웃되었습니다.');
     } catch (e) {
-      // 로그아웃 에러 처리
       print('로그아웃 에러: $e');
       SnackbarHelper.showSuccess(context, '로그아웃 중 에러가 발생했습니다.');
     }
@@ -40,12 +53,10 @@ class ProfileScreen extends StatelessWidget {
 
   void _deleteAccount(BuildContext context) async {
     try {
-      await _auth.deleteAccount();
+      await _authenticationService.deleteAccount();
       Navigator.pushReplacementNamed(context, '/login');
-      // 탈퇴 성공 시 사용자에게 메시지 표시
       SnackbarHelper.showSuccess(context, '계정이 성공적으로 삭제되었습니다.');
     } catch (e) {
-      // 회원 탈퇴 에러 처리
       print('회원 탈퇴 에러: $e');
       SnackbarHelper.showError(context, '회원 탈퇴 중 에러가 발생했습니다.');
     }
@@ -57,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
       path: 'daseul.frontend@gmail.com',
       queryParameters: {
         'subject': '문의사항',
-        'body': '안녕하세요, 여기에 내용을 입력해주세요.', // 이메일 본문 내용
+        'body': '안녕하세요, 여기에 내용을 입력해주세요.',
       },
     );
 
@@ -74,8 +85,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    User? currentUser = _auth.getCurrentUser();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('프로필 화면'),
@@ -85,35 +94,53 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
-              leading: Icon(Icons.email),
-              title: Text('이메일'),
-              subtitle: Text(currentUser?.email ?? '이메일 없음'), // 사용자 이메일 표시
+            ClipOval(
+              child: Container(
+                width: 100, // 이미지 원형의 크기를 조절
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: NetworkImage(currentUser?.photoURL ?? ''),
+                    fit: BoxFit.contain, // 이미지를 원형 영역에 맞추도록 설정
+                  ),
+                ),
+              ),
             ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('개인정보 관리'),
-              onTap: () => navigateToProfileManagement(context),
+            SizedBox(height: 20),
+            Text(
+              // 사용자 이름 표시
+              currentUser?.displayName ?? '사용자 이름 없음',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('계정 설정'),
-              onTap: () => navigateToAccountSettings(context),
+            SizedBox(height: 10),
+            Text(
+              // 사용자 이메일 표시
+              currentUser?.email ?? '이메일 없음',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
             ),
-            ListTile(
-              leading: Icon(Icons.support),
-              title: Text('고객 지원'),
-              onTap: () => navigateToCustomerSupport(context),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => navigateToProfileManagement(context),
+              child: Text('개인정보 관리'),
             ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('로그아웃'),
-              onTap: () => _logout(context),
+            ElevatedButton(
+              onPressed: () => navigateToAccountSettings(context),
+              child: Text('계정 설정'),
             ),
-            ListTile(
-              leading: Icon(Icons.delete),
-              title: Text('회원 탈퇴'),
-              onTap: () => _deleteAccount(context),
+            ElevatedButton(
+              onPressed: () => navigateToCustomerSupport(context),
+              child: Text('고객 지원'),
+            ),
+            ElevatedButton(
+              onPressed: () => _logout(context),
+              child: Text('로그아웃'),
+            ),
+            ElevatedButton(
+              onPressed: () => _deleteAccount(context),
+              child: Text('회원 탈퇴'),
             ),
           ],
         ),
